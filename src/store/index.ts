@@ -1,7 +1,6 @@
 import { createStore, Store, useStore as baseUseStore } from 'vuex';
 import type { InjectionKey } from 'vue';
-import type { IToDo } from '@/types';
-import type { MutationTree } from 'vuex';
+import type { IToDo, KeysToDo } from '@/types';
 
 export interface State {
   todos: IToDo[];
@@ -11,6 +10,7 @@ export interface State {
 export const key: InjectionKey<Store<State>> = Symbol();
 
 export const store = createStore<State>({
+  strict: true,
   state: {
     todos: [
       { name: 'Learn Vue js', id: 1, isComplete: false, isFavorite: false },
@@ -26,6 +26,9 @@ export const store = createStore<State>({
     doneToDos(state) {
       return state.todos.filter((todo) => todo.isComplete);
     },
+    incomoleteTodos(state) {
+      return state.todos.filter((todo) => !todo.isComplete);
+    },
     favoriteToDos(state) {
       return state.todos.filter((todo) => todo.isFavorite);
     },
@@ -33,6 +36,19 @@ export const store = createStore<State>({
   mutations: {
     addToDo(state, payload) {
       state.todos.push(payload);
+    },
+    setToDo(state, payload: { id: number; isComplete: boolean }) {
+      state.todos = [
+        ...state.todos.map((todo) => {
+          if (todo.id === payload.id) {
+            return {
+              ...todo,
+              isComplete: payload.isComplete,
+            };
+          }
+          return todo;
+        }),
+      ];
     },
   },
   actions: {
@@ -44,7 +60,10 @@ export const store = createStore<State>({
         isFavorite: false,
         isComplete: false,
       };
-      commit('addToDo', payload);
+      commit('addToDo', todo);
+    },
+    setIsComplete({ commit }, payload: { id: number; isComplete: boolean }) {
+      commit('setToDo', payload);
     },
   },
 });

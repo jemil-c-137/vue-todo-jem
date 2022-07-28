@@ -4,3 +4,5 @@ export interface IToDo {
   isComplete: boolean;
   isFavorite: boolean;
 }
+
+export type KeysToDo = keyof IToDo;
